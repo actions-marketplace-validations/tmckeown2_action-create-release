@@ -1,0 +1,22 @@
+name: "Create new release"
+description: "Creates a new release for a given repo"
+author: "Thomas McKeown"
+inputs:
+  jira_ticket_prefix:
+    description: "Prefix for Jira tickets"
+    required: true
+  component:
+    description: "Component name for the release"
+    required: true
+  tag: 
+    description: "Tag to create and use for the release"
+    required: true
+  previous_tag:
+    description: "Tag to use as the previous. Defaults to latest tag or first commit if no tags exist"
+    required: false
+  commit_sha:
+    description: "Commit hash to tag. Defaults to HEAD commit"
+    required: false
+runs:
+  using: "docker"
+  image: "DOCKERFILE"
