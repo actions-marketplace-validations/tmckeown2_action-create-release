@@ -1,7 +1,5 @@
 # GitHub Action: Create New Release
 
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/tmckeown2/action-create-release?logo=github&sort=semver)](https://github.com/tmckeown2/action-create-release/releases)
-
 GitHub action for a release pipeline. Creates a new tag and pushes it to the remote, creates a new GitHub release, and triggers a Jira release using webhooks.
 
 ## Inputs
