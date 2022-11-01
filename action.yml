@@ -2,12 +2,6 @@ name: "Create new release"
 description: "Creates a new release for a given repo"
 author: "Thomas McKeown"
 inputs:
-  jira_ticket_prefix:
-    description: "Prefix for Jira tickets"
-    required: true
-  component:
-    description: "Component name for the release"
-    required: true
   tag: 
     description: "Tag to create and use for the release"
     required: true
@@ -17,6 +11,18 @@ inputs:
   commit_sha:
     description: "Commit hash to tag. Defaults to HEAD commit"
     required: false
+  component:
+    description: "Component name for the release"
+    required: true
+  jira_ticket_prefix:
+    description: "Prefix for Jira tickets"
+    required: true
+  jira_create_version_webhook:
+    description: "Webhook URL for the 'Create Version' automation within Jira project"
+    required: true
+  jira_add_issues_webhook:
+    description: "Webhook URL for the 'Add Issues' automation within Jira project"
+    required: true
 runs:
   using: "docker"
   image: "DOCKERFILE"
