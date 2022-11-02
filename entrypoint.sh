@@ -120,7 +120,7 @@ echo "[action-create-release] Calling Jira webhook for 'Create Version' automati
 curl \
   -X POST \
   -H 'Content-type: application/json' \
-  ${JIRA_CREATE_VERSION_WEBHOOK}
+  ${JIRA_CREATE_VERSION_WEBHOOK} \
   -d "${JIRA_VERSION_DATA}"
 
 ## Add issues to Jira version
@@ -128,5 +128,5 @@ echo "[action-create-release] Calling Jira webhook for 'Add Issues' automation"
 curl \
   -X POST \
   -H 'Content-type: application/json' \
-  ${JIRA_ADD_ISSUES_WEBHOOK}
+  ${JIRA_ADD_ISSUES_WEBHOOK} \
   -d "${JIRA_VERSION_DATA}"
