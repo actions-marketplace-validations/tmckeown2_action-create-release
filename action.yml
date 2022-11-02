@@ -2,6 +2,9 @@ name: "Create new release"
 description: "Creates a new release for a given repo"
 author: "Thomas McKeown"
 inputs:
+  github_token:
+    description: "GITHUB_TOKEN. Optional if you use checkout@v2 action."
+    default: "${{ github.token }}"
   tag: 
     description: "Tag to create and use for the release"
     required: true
