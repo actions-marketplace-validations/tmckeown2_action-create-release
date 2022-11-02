@@ -89,10 +89,8 @@ echo "[action-create-release] Create GitHub release."
 echo "[action-create-release] Building GitHub json request body"
 GITHUB_API_DATA=$(jq -Rnc \
   --arg tag_name "${TAG}" \
-  --arg prerelease "true" \
-  --arg generate_release_notes "true" \
   --arg body "${GITHUB_RELEASE_RELATED_ISSUES}" \
-  '{ "tag_name": $tag_name, "prerelease": $prerelease, "generate_release_notes": $generate_release_notes, "body": $body }')
+  '{ "tag_name": $tag_name, "prerelease": true, "generate_release_notes": true, "body": $body }')
 echo "[action-create-release] Calling GitHub API to create a release"
 curl \
   -X POST \
