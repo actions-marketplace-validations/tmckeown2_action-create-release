@@ -28,4 +28,4 @@ inputs:
     required: true
 runs:
   using: "docker"
-  image: "DOCKERFILE"
+  image: "Dockerfile"
