@@ -10,25 +10,25 @@ cd "${GITHUB_WORKSPACE}" || exit
 echo "[action-create-release] Checking for required parameters"
 if [ -z "${INPUT_TAG}" ]; then
   echo "[action-create-release] No 'tag' was supplied! Please supply a tag."
-  MISSING_PARAMS=true
+  MISSING_PARAMS="true"
 fi
 if [ -z "${INPUT_COMPONENT}" ]; then
   echo "[action-create-release] No 'component' was supplied! Please supply a component name."
-  MISSING_PARAMS=true
+  MISSING_PARAMS="true"
 fi
 if [ -z "${INPUT_JIRA_TICKET_PREFIX}" ]; then
   echo "[action-create-release] No 'jira_ticket_prefix' was supplied! Please supply a Jira ticket prefix."
-  MISSING_PARAMS=true
+  MISSING_PARAMS="true"
 fi
 if [ -z "${INPUT_JIRA_CREATE_VERSION_WEBHOOK}" ]; then
   echo "[action-create-release] No 'jira_create_version_webhook' was supplied! Please supply a Jira webhook URL for 'Create Version' automation."
-  MISSING_PARAMS=true
+  MISSING_PARAMS="true"
 fi
 if [ -z "${INPUT_JIRA_ADD_ISSUES_WEBHOOK}" ]; then
   echo "[action-create-release] No 'jira_add_issues_webhook' was supplied! Please supply a Jira webhook URL for 'Add Issues' automation."
-  MISSING_PARAMS=true
+  MISSING_PARAMS="true"
 fi
-if [ ${MISSING_PARAMS} ]; then
+if [ "${MISSING_PARAMS}" == "true" ]; then
   echo "[action-create-release] ERROR: Missing parameters. Exiting"
   exit 1
 fi
