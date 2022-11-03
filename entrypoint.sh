@@ -11,26 +11,32 @@ echo "[action-create-release] Checking for required parameters"
 MISSING_PARAMS="false"
 if [ -z "${INPUT_TAG}" ]; then
   echo "[action-create-release] No 'tag' was supplied! Please supply a tag."
+  echo "ERROR: No 'tag' was supplied! Please supply a tag." >> ${GITHUB_STEP_SUMMARY}
   MISSING_PARAMS="true"
 fi
 if [ -z "${INPUT_COMPONENT}" ]; then
   echo "[action-create-release] No 'component' was supplied! Please supply a component name."
+  echo "ERROR: No 'component' was supplied! Please supply a component name." >> ${GITHUB_STEP_SUMMARY}
   MISSING_PARAMS="true"
 fi
 if [ -z "${INPUT_JIRA_TICKET_PREFIX}" ]; then
   echo "[action-create-release] No 'jira_ticket_prefix' was supplied! Please supply a Jira ticket prefix."
+  echo "ERROR: No 'jira_ticket_prefix' was supplied! Please supply a Jira ticket prefix." >> ${GITHUB_STEP_SUMMARY}
   MISSING_PARAMS="true"
 fi
 if [ -z "${INPUT_JIRA_CREATE_VERSION_WEBHOOK}" ]; then
   echo "[action-create-release] No 'jira_create_version_webhook' was supplied! Please supply a Jira webhook URL for 'Create Version' automation."
+  echo "ERROR: No 'jira_create_version_webhook' was supplied! Please supply a Jira webhook URL for 'Create Version' automation." >> ${GITHUB_STEP_SUMMARY}
   MISSING_PARAMS="true"
 fi
 if [ -z "${INPUT_JIRA_ADD_ISSUES_WEBHOOK}" ]; then
   echo "[action-create-release] No 'jira_add_issues_webhook' was supplied! Please supply a Jira webhook URL for 'Add Issues' automation."
+  echo "ERROR: No 'jira_add_issues_webhook' was supplied! Please supply a Jira webhook URL for 'Add Issues' automation." >> ${GITHUB_STEP_SUMMARY}
   MISSING_PARAMS="true"
 fi
 if [ "${MISSING_PARAMS}" == "true" ]; then
   echo "[action-create-release] ERROR: Missing parameters. Exiting"
+  echo "ERROR: Missing parameters" >> ${GITHUB_STEP_SUMMARY}
   exit 1
 fi
 
@@ -55,7 +61,7 @@ GITHUB_RELEASE_RELATED_ISSUES="$(git log --merges --oneline ${PREVIOUS_TAG}..${C
   | uniq \
   | awk '{printf "- [%1$s](https://jira.sage.com/browse/%1$s)\\n", $0}' )"
 echo "[action-create-release] Building Jira release issues list"
-JIRA_RELEASE_RELATED_ISSUES="$(git log --merges --oneline ${{ needs.createTag.outputs.latestTag }}..${{ needs.createTag.outputs.tagCommit }} \
+JIRA_RELEASE_RELATED_ISSUES="$(git log --merges --oneline ${PREVIOUS_TAG}..${COMMIT_SHA} \
   | grep 'Merge pull request #' \
   | awk '{print $7}' \
   | sed s:Sage/:: \
@@ -64,9 +70,17 @@ JIRA_RELEASE_RELATED_ISSUES="$(git log --merges --oneline ${{ needs.createTag.ou
   | sed "/^${JIRA_TICKET_PREFIX}-[0-9]*$/!d" \
   | paste -sd ,)"
 
-echo "[action-create-release] ENV PRINT START"
-printenv
-echo "[action-create-release] ENV PRINT END"
+echo "Running with vars:" >> ${GITHUB_STEP_SUMMARY}
+echo "TAG='${TAG}'" >> ${GITHUB_STEP_SUMMARY}
+echo "PREVIOUS_TAG='${PREVIOUS_TAG}'" >> ${GITHUB_STEP_SUMMARY}
+echo "COMMIT_SHA='${COMMIT_SHA}'" >> ${GITHUB_STEP_SUMMARY}
+echo "COMPONENT='${COMPONENT}'" >> ${GITHUB_STEP_SUMMARY}
+echo "JIRA_TICKET_PREFIX='${JIRA_TICKET_PREFIX}'" >> ${GITHUB_STEP_SUMMARY}
+echo "JIRA_CREATE_VERSION_WEBHOOK='${JIRA_CREATE_VERSION_WEBHOOK}'" >> ${GITHUB_STEP_SUMMARY}
+echo "JIRA_ADD_ISSUES_WEBHOOK='${JIRA_ADD_ISSUES_WEBHOOK}'" >> ${GITHUB_STEP_SUMMARY}
+echo "MERGES='${MERGES}'" >> ${GITHUB_STEP_SUMMARY}
+echo "GITHUB_RELEASE_RELATED_ISSUES='${GITHUB_RELEASE_RELATED_ISSUES}'" >> ${GITHUB_STEP_SUMMARY}
+echo "JIRA_RELEASE_RELATED_ISSUES='${JIRA_RELEASE_RELATED_ISSUES}'" >> ${GITHUB_STEP_SUMMARY}
 
 echo "[action-create-release] Setting git config"
 git config user.name "${GITHUB_ACTOR}"
@@ -78,13 +92,15 @@ echo "[action-create-release] Create tag '${TAG}'."
 ## Check tag doesn't already exist
 echo "[action-create-release] Checking that the tag doesn't already exist"
 if [[ "$(git tag -l)" == *"${TAG}"* ]]; then
-  echo "[action-create-release] Tag '${TAG}' already exists"
+  echo "[action-create-release] ERROR: Tag '${TAG}' already exists"
+  echo "ERROR: Tag '${TAG}' already exists" >> ${GITHUB_STEP_SUMMARY}
   exit 1
 fi
 ## Check there have been changes since latest tag
 echo "[action-create-release] Checking for changes since previous tag"
 if [ -z "${MERGES}" ]; then
   echo "[action-create-release] No changes to release"
+  echo "No changes to release" >> ${GITHUB_STEP_SUMMARY}
   exit 1
 fi
 ## Create lightweight tag
@@ -106,6 +122,7 @@ GITHUB_API_DATA=$(jq -Rnc \
   --arg body "${GITHUB_RELEASE_RELATED_ISSUES}" \
   '{ "tag_name": $tag_name, "prerelease": true, "generate_release_notes": true, "body": $body }')
 echo "[action-create-release] Calling GitHub API to create a release"
+echo "GitHub request: ${GITHUB_API_DATA}" >> ${GITHUB_STEP_SUMMARY}
 curl \
   -X POST \
   -H "Accept: application/vnd.github+json" \
@@ -128,6 +145,7 @@ JIRA_VERSION_DATA=$(jq -Rnc \
   --arg releaseDate "${RELEASE_DATE}" \
   --argjson issues "${ISSUES}" \
   '{ "component": $component, "tag": $tag, "releaseDate": $releaseDate, "issues": $issues }')
+  echo "Jira request: ${JIRA_VERSION_DATA}" >> ${GITHUB_STEP_SUMMARY}
 
 ## Create the Jira version
 echo "[action-create-release] Calling Jira webhook for 'Create Version' automation"
