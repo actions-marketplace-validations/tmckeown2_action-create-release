@@ -50,10 +50,15 @@ JIRA_TICKET_PREFIX="${INPUT_JIRA_TICKET_PREFIX}"
 JIRA_CREATE_VERSION_WEBHOOK="${INPUT_JIRA_CREATE_VERSION_WEBHOOK}"
 JIRA_ADD_ISSUES_WEBHOOK="${INPUT_JIRA_ADD_ISSUES_WEBHOOK}"
 
+echo "# ENV VARS" >> ${GITHUB_STEP_SUMMARY}
+echo "\`\`\`" >> ${GITHUB_STEP_SUMMARY}
+printenv >> ${GITHUB_STEP_SUMMARY}
+echo "\`\`\`" >> ${GITHUB_STEP_SUMMARY}
+
 echo "[action-create-release] Getting merges"
 MERGES="$(git log --merges --oneline ${PREVIOUS_TAG}..${COMMIT_SHA})"
 echo "[action-create-release] Building GitHub release issues list"
-GITHUB_RELEASE_RELATED_ISSUES="$(git log --merges --oneline ${PREVIOUS_TAG}..${COMMIT_SHA} \
+GITHUB_RELEASE_RELATED_ISSUES="$(echo "${MERGES}" \
   | grep 'Merge pull request #' \
   | awk '{print $7}' \
   | sed s:Sage/:: \
@@ -61,7 +66,7 @@ GITHUB_RELEASE_RELATED_ISSUES="$(git log --merges --oneline ${PREVIOUS_TAG}..${C
   | uniq \
   | awk '{printf "- [%1$s](https://jira.sage.com/browse/%1$s)\n", $0}' )"
 echo "[action-create-release] Building Jira release issues list"
-JIRA_RELEASE_RELATED_ISSUES="$(git log --merges --oneline ${PREVIOUS_TAG}..${COMMIT_SHA} \
+JIRA_RELEASE_RELATED_ISSUES="$(echo "${MERGES}" \
   | grep 'Merge pull request #' \
   | awk '{print $7}' \
   | sed s:Sage/:: \
