@@ -59,7 +59,7 @@ GITHUB_RELEASE_RELATED_ISSUES="$(git log --merges --oneline ${PREVIOUS_TAG}..${C
   | sed s:Sage/:: \
   | sort \
   | uniq \
-  | awk '{printf "- [%1$s](https://jira.sage.com/browse/%1$s)\\n", $0}' )"
+  | awk '{printf "- [%1$s](https://jira.sage.com/browse/%1$s)\n", $0}' )"
 echo "[action-create-release] Building Jira release issues list"
 JIRA_RELEASE_RELATED_ISSUES="$(git log --merges --oneline ${PREVIOUS_TAG}..${COMMIT_SHA} \
   | grep 'Merge pull request #' \
@@ -78,13 +78,19 @@ echo "COMPONENT='${COMPONENT}'" >> ${GITHUB_STEP_SUMMARY}
 echo "JIRA_TICKET_PREFIX='${JIRA_TICKET_PREFIX}'" >> ${GITHUB_STEP_SUMMARY}
 
 echo "# Merges log" >> ${GITHUB_STEP_SUMMARY}
+echo "\`\`\`" >> ${GITHUB_STEP_SUMMARY}
 echo "${MERGES}" >> ${GITHUB_STEP_SUMMARY}
+echo "\`\`\`" >> ${GITHUB_STEP_SUMMARY}
 
 echo "# GitHub release related issues" >> ${GITHUB_STEP_SUMMARY}
-echo "GITHUB_RELEASE_RELATED_ISSUES='${GITHUB_RELEASE_RELATED_ISSUES}'" >> ${GITHUB_STEP_SUMMARY}
+echo "\`\`\`" >> ${GITHUB_STEP_SUMMARY}
+echo "${GITHUB_RELEASE_RELATED_ISSUES}" >> ${GITHUB_STEP_SUMMARY}
+echo "\`\`\`" >> ${GITHUB_STEP_SUMMARY}
 
 echo "# Jira release related issues" >> ${GITHUB_STEP_SUMMARY}
-echo "JIRA_RELEASE_RELATED_ISSUES='${JIRA_RELEASE_RELATED_ISSUES}'" >> ${GITHUB_STEP_SUMMARY}
+echo "\`\`\`" >> ${GITHUB_STEP_SUMMARY}
+echo "${JIRA_RELEASE_RELATED_ISSUES}" >> ${GITHUB_STEP_SUMMARY}
+echo "\`\`\`" >> ${GITHUB_STEP_SUMMARY}
 
 echo "[action-create-release] Setting git config"
 git config user.name "${GITHUB_ACTOR}"
