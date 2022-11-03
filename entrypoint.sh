@@ -8,6 +8,7 @@ cd "${GITHUB_WORKSPACE}" || exit
 
 # Check for required parameters
 echo "[action-create-release] Checking for required parameters"
+MISSING_PARAMS="false"
 if [ -z "${INPUT_TAG}" ]; then
   echo "[action-create-release] No 'tag' was supplied! Please supply a tag."
   MISSING_PARAMS="true"
