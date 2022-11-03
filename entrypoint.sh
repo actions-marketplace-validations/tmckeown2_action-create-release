@@ -70,16 +70,20 @@ JIRA_RELEASE_RELATED_ISSUES="$(git log --merges --oneline ${PREVIOUS_TAG}..${COM
   | sed "/^${JIRA_TICKET_PREFIX}-[0-9]*$/!d" \
   | paste -sd ,)"
 
-echo "Running with vars:" >> ${GITHUB_STEP_SUMMARY}
+echo "# Vars" >> ${GITHUB_STEP_SUMMARY}
 echo "TAG='${TAG}'" >> ${GITHUB_STEP_SUMMARY}
 echo "PREVIOUS_TAG='${PREVIOUS_TAG}'" >> ${GITHUB_STEP_SUMMARY}
 echo "COMMIT_SHA='${COMMIT_SHA}'" >> ${GITHUB_STEP_SUMMARY}
 echo "COMPONENT='${COMPONENT}'" >> ${GITHUB_STEP_SUMMARY}
 echo "JIRA_TICKET_PREFIX='${JIRA_TICKET_PREFIX}'" >> ${GITHUB_STEP_SUMMARY}
-echo "JIRA_CREATE_VERSION_WEBHOOK='${JIRA_CREATE_VERSION_WEBHOOK}'" >> ${GITHUB_STEP_SUMMARY}
-echo "JIRA_ADD_ISSUES_WEBHOOK='${JIRA_ADD_ISSUES_WEBHOOK}'" >> ${GITHUB_STEP_SUMMARY}
-echo "MERGES='${MERGES}'" >> ${GITHUB_STEP_SUMMARY}
+
+echo "# Merges log" >> ${GITHUB_STEP_SUMMARY}
+echo "${MERGES}" >> ${GITHUB_STEP_SUMMARY}
+
+echo "# GitHub release related issues" >> ${GITHUB_STEP_SUMMARY}
 echo "GITHUB_RELEASE_RELATED_ISSUES='${GITHUB_RELEASE_RELATED_ISSUES}'" >> ${GITHUB_STEP_SUMMARY}
+
+echo "# Jira release related issues" >> ${GITHUB_STEP_SUMMARY}
 echo "JIRA_RELEASE_RELATED_ISSUES='${JIRA_RELEASE_RELATED_ISSUES}'" >> ${GITHUB_STEP_SUMMARY}
 
 echo "[action-create-release] Setting git config"
@@ -122,7 +126,8 @@ GITHUB_API_DATA=$(jq -Rnc \
   --arg body "${GITHUB_RELEASE_RELATED_ISSUES}" \
   '{ "tag_name": $tag_name, "prerelease": true, "generate_release_notes": true, "body": $body }')
 echo "[action-create-release] Calling GitHub API to create a release"
-echo "GitHub request: ${GITHUB_API_DATA}" >> ${GITHUB_STEP_SUMMARY}
+echo "# GitHub request" >> ${GITHUB_STEP_SUMMARY}
+echo "${GITHUB_API_DATA}" >> ${GITHUB_STEP_SUMMARY}
 curl \
   -X POST \
   -H "Accept: application/vnd.github+json" \
@@ -145,7 +150,9 @@ JIRA_VERSION_DATA=$(jq -Rnc \
   --arg releaseDate "${RELEASE_DATE}" \
   --argjson issues "${ISSUES}" \
   '{ "component": $component, "tag": $tag, "releaseDate": $releaseDate, "issues": $issues }')
-  echo "Jira request: ${JIRA_VERSION_DATA}" >> ${GITHUB_STEP_SUMMARY}
+
+echo "# Jira request" >> ${GITHUB_STEP_SUMMARY}
+echo "${JIRA_VERSION_DATA}" >> ${GITHUB_STEP_SUMMARY}
 
 ## Create the Jira version
 echo "[action-create-release] Calling Jira webhook for 'Create Version' automation"
