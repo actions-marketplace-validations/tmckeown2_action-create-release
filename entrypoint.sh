@@ -71,7 +71,7 @@ RELATED_ISSUES="$(echo "${MERGES}" \
   | uniq)"
 echo "[action-create-release] Building GitHub release issues list"
 GITHUB_RELEASE_RELATED_ISSUES="$(echo "${RELATED_ISSUES}" \
-  | xargs -I@ echo "[@]${JIRA_TICKET_URL}/@")"
+  | xargs -I@ echo "[@](${JIRA_TICKET_URL}/@)")"
 echo "[action-create-release] Building Jira release issues list"
 JIRA_RELEASE_RELATED_ISSUES="$(echo "${RELATED_ISSUES}" \
   | sed "/^${JIRA_TICKET_PREFIX}-[0-9]*$/!d" \
