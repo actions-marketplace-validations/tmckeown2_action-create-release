@@ -56,11 +56,6 @@ JIRA_TICKET_URL="${INPUT_JIRA_TICKET_URL}"
 JIRA_CREATE_VERSION_WEBHOOK="${INPUT_JIRA_CREATE_VERSION_WEBHOOK}"
 JIRA_ADD_ISSUES_WEBHOOK="${INPUT_JIRA_ADD_ISSUES_WEBHOOK}"
 
-echo "# ENV VARS" >> ${GITHUB_STEP_SUMMARY}
-echo "\`\`\`" >> ${GITHUB_STEP_SUMMARY}
-printenv >> ${GITHUB_STEP_SUMMARY}
-echo "\`\`\`" >> ${GITHUB_STEP_SUMMARY}
-
 # Check previous tag exists
 ## Check in tags, if not then check it isn't a commit SHA
 if [[ "$(git tag -l)" != *"${PREVIOUS_TAG}"* && "$(git cat-file -t ${PREVIOUS_TAG})" != "commit" ]]; then
@@ -164,7 +159,9 @@ GITHUB_API_DATA=$(jq -Rnc \
   '{ "tag_name": $tag_name, "prerelease": true, "generate_release_notes": true, "body": $body }')
 echo "[action-create-release] Calling GitHub API to create a release"
 echo "# GitHub request" >> ${GITHUB_STEP_SUMMARY}
+echo "\`\`\`" >> ${GITHUB_STEP_SUMMARY}
 echo "${GITHUB_API_DATA}" >> ${GITHUB_STEP_SUMMARY}
+echo "\`\`\`" >> ${GITHUB_STEP_SUMMARY}
 curl \
   -X POST \
   -H "Accept: application/vnd.github+json" \
@@ -189,7 +186,9 @@ JIRA_VERSION_DATA=$(jq -Rnc \
   '{ "component": $component, "tag": $tag, "releaseDate": $releaseDate, "issues": $issues }')
 
 echo "# Jira request" >> ${GITHUB_STEP_SUMMARY}
+echo "\`\`\`" >> ${GITHUB_STEP_SUMMARY}
 echo "${JIRA_VERSION_DATA}" >> ${GITHUB_STEP_SUMMARY}
+echo "\`\`\`" >> ${GITHUB_STEP_SUMMARY}
 
 ## Create the Jira version
 echo "[action-create-release] Calling Jira webhook for 'Create Version' automation"
