@@ -61,6 +61,21 @@ echo "\`\`\`" >> ${GITHUB_STEP_SUMMARY}
 printenv >> ${GITHUB_STEP_SUMMARY}
 echo "\`\`\`" >> ${GITHUB_STEP_SUMMARY}
 
+# Check previous tag exists
+## Check in tags, if not then check it isn't a commit SHA
+if [[ "$(git tag -l)" != *"${PREVIOUS_TAG}"* && "$(git cat-file -t ${PREVIOUS_TAG})" != "commit" ]]; then
+  echo "[action-create-release] Previous tag not found"
+  echo "ERROR: Previous tag not found" >> ${GITHUB_STEP_SUMMARY}
+  exit 1
+fi
+
+# Check commit SHA exists
+if [[ "$(git cat-file -t ${COMMIT_SHA})" != "commit" ]]; then
+  echo "[action-create-release] Commit SHA not found"
+  echo "ERROR: Commit SHA not found" >> ${GITHUB_STEP_SUMMARY}
+  exit 1
+fi
+
 echo "[action-create-release] Getting merges"
 MERGES="$(git log --merges --oneline ${PREVIOUS_TAG}..${COMMIT_SHA})"
 RELATED_ISSUES="$(echo "${MERGES}" \
