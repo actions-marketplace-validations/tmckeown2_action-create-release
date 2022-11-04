@@ -20,6 +20,9 @@ inputs:
   jira_ticket_prefix:
     description: "Prefix for Jira tickets"
     required: true
+  jira_ticket_url:
+    description: "URL for the jira tickets"
+    required: true
   jira_create_version_webhook:
     description: "Webhook URL for the 'Create Version' automation within Jira project"
     required: true

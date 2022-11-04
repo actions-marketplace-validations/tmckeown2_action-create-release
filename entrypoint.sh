@@ -24,6 +24,11 @@ if [ -z "${INPUT_JIRA_TICKET_PREFIX}" ]; then
   echo "ERROR: No 'jira_ticket_prefix' was supplied! Please supply a Jira ticket prefix." >> ${GITHUB_STEP_SUMMARY}
   MISSING_PARAMS="true"
 fi
+if [ -z "${INPUT_JIRA_TICKET_URL}" ]; then
+  echo "[action-create-release] No 'jira_ticket_url' was supplied! Please supply a Jira ticket URL."
+  echo "ERROR: No 'jira_ticket_url' was supplied! Please supply a Jira ticket URL." >> ${GITHUB_STEP_SUMMARY}
+  MISSING_PARAMS="true"
+fi
 if [ -z "${INPUT_JIRA_CREATE_VERSION_WEBHOOK}" ]; then
   echo "[action-create-release] No 'jira_create_version_webhook' was supplied! Please supply a Jira webhook URL for 'Create Version' automation."
   echo "ERROR: No 'jira_create_version_webhook' was supplied! Please supply a Jira webhook URL for 'Create Version' automation." >> ${GITHUB_STEP_SUMMARY}
@@ -47,6 +52,7 @@ PREVIOUS_TAG="${INPUT_PREVIOUS_TAG:-$(git describe --abbrev=0 --tags || git rev-
 COMMIT_SHA="${INPUT_COMMIT_SHA:-$(git rev-parse HEAD)}"
 COMPONENT="${INPUT_COMPONENT}"
 JIRA_TICKET_PREFIX="${INPUT_JIRA_TICKET_PREFIX}"
+JIRA_TICKET_URL="${INPUT_JIRA_TICKET_URL}"
 JIRA_CREATE_VERSION_WEBHOOK="${INPUT_JIRA_CREATE_VERSION_WEBHOOK}"
 JIRA_ADD_ISSUES_WEBHOOK="${INPUT_JIRA_ADD_ISSUES_WEBHOOK}"
 
@@ -57,30 +63,28 @@ echo "\`\`\`" >> ${GITHUB_STEP_SUMMARY}
 
 echo "[action-create-release] Getting merges"
 MERGES="$(git log --merges --oneline ${PREVIOUS_TAG}..${COMMIT_SHA})"
+RELATED_ISSUES="$(echo "${MERGES}" \
+  | grep 'Merge pull request #' \
+  | awk '{print $7}' \
+  | sed s:${GITHUB_REPOSITORY_OWNER}/:: \
+  | sort \
+  | uniq)"
 echo "[action-create-release] Building GitHub release issues list"
-GITHUB_RELEASE_RELATED_ISSUES="$(echo "${MERGES}" \
-  | grep 'Merge pull request #' \
-  | awk '{print $7}' \
-  | sed s:Sage/:: \
-  | sort \
-  | uniq \
-  | awk '{printf "- [%1$s](https://jira.sage.com/browse/%1$s)\n", $0}' )"
+GITHUB_RELEASE_RELATED_ISSUES="$(echo "${RELATED_ISSUES}" \
+  | xargs -I@ echo "[@]${JIRA_TICKET_URL}/@")"
 echo "[action-create-release] Building Jira release issues list"
-JIRA_RELEASE_RELATED_ISSUES="$(echo "${MERGES}" \
-  | grep 'Merge pull request #' \
-  | awk '{print $7}' \
-  | sed s:Sage/:: \
-  | sort \
-  | uniq \
+JIRA_RELEASE_RELATED_ISSUES="$(echo "${RELATED_ISSUES}" \
   | sed "/^${JIRA_TICKET_PREFIX}-[0-9]*$/!d" \
   | paste -sd ,)"
 
 echo "# Vars" >> ${GITHUB_STEP_SUMMARY}
+echo "\`\`\`" >> ${GITHUB_STEP_SUMMARY}
 echo "TAG='${TAG}'" >> ${GITHUB_STEP_SUMMARY}
 echo "PREVIOUS_TAG='${PREVIOUS_TAG}'" >> ${GITHUB_STEP_SUMMARY}
 echo "COMMIT_SHA='${COMMIT_SHA}'" >> ${GITHUB_STEP_SUMMARY}
 echo "COMPONENT='${COMPONENT}'" >> ${GITHUB_STEP_SUMMARY}
 echo "JIRA_TICKET_PREFIX='${JIRA_TICKET_PREFIX}'" >> ${GITHUB_STEP_SUMMARY}
+echo "\`\`\`" >> ${GITHUB_STEP_SUMMARY}
 
 echo "# Merges log" >> ${GITHUB_STEP_SUMMARY}
 echo "\`\`\`" >> ${GITHUB_STEP_SUMMARY}

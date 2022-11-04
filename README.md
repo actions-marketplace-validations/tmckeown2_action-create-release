@@ -19,6 +19,9 @@ GitHub action for a release pipeline. Creates a new tag and pushes it to the rem
 ### `jira_ticket_prefix`
 **Required**. Prefix for the Jira tickets
 
+### `jira_ticket_url`
+**Required**. URL for the Jira tickets
+
 ### `jira_create_version_webhook`
 **Required**. Webhook URL for the 'Create Version' automation within Jira project
 
